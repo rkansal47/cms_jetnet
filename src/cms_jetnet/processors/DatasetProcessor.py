@@ -75,10 +75,10 @@ class DatasetProcessor(ProcessorABC):
             },
         }
 
-        self.columns = [
+        self._columns = [
             f"{vartype}_{var}" for vartype in self.skim_vars for var in self.skim_vars[vartype]
         ]
-        print(self.columns)
+        print(self._columns)
 
         self.num_jets = num_jets
         self.num_particles = num_particles
@@ -87,7 +87,7 @@ class DatasetProcessor(ProcessorABC):
 
     @property
     def columns(self):
-        return self.columns
+        return self._columns
 
     @property
     def accumulator(self):
