@@ -147,7 +147,6 @@ def main(args):
     )
 
     out = run(fileset, "Events", processor_instance=p)
-    print(out)
 
     os.system(f"mkdir -p {args.tag}")
     dd.to_parquet(df=out, path=f"{args.tag}/")
