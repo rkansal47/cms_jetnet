@@ -72,7 +72,7 @@ class NanoeventsSchemaPlugin(WorkerPlugin):
         nanoevents.NanoAODSchema.mixins["PFCands"] = "PFCand"
 
 
-def get_fileset(processor, year, samples, subsamples, starti, endi):
+def get_fileset(year, samples, subsamples, starti, endi):
     with open(f"data/pfnanoindex_{year}.json", "r") as f:
         full_fileset = json.load(f)
 
@@ -109,9 +109,7 @@ def main(args):
     p = DatasetProcessor(radius=args.label.split("_")[0])
 
     fileset = (
-        get_fileset(
-            args.processor, args.year, args.samples, args.subsamples, args.starti, args.endi
-        )
+        get_fileset(args.year, args.samples, args.subsamples, args.starti, args.endi)
         if not len(args.files)
         else {f"{args.year}_files": args.files}
     )
