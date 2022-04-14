@@ -117,6 +117,8 @@ def main(args):
     if args.test:
         fileset = {key: val[:10] for key, val in fileset.items()}
 
+    print(fileset)
+
     import time
     from distributed import Client
     from lpcjobqueue import LPCCondorCluster
@@ -143,12 +145,14 @@ def main(args):
         schema=nanoevents.NanoAODSchema,
         chunksize=args.chunksize,
     )
-    out, metrics = run(fileset, "Events", processor_instance=p)
+
+    out = run(fileset, "Events", processor_instance=p)
+    print(out)
 
     dd.to_parquet(df=out, path=f"/eos/uscms/store/user/rkansal/cms_jetnet/{args.tag}")
 
     elapsed = time.time() - tic
-    print(f"Metrics: {metrics}")
+    # print(f"Metrics: {metrics}")
     print(f"Finished in {elapsed:.1f}s")
 
 
