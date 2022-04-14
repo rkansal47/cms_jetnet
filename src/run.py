@@ -141,9 +141,10 @@ def main(args):
     executor = processor.DaskExecutor(client=client, use_dataframes=True)
     run = processor.Runner(
         executor=executor,
-        savemetrics=True,
+        # savemetrics=True,
         schema=nanoevents.NanoAODSchema,
         chunksize=args.chunksize,
+        maxchunks=args.maxchunks,
     )
 
     out = run(fileset, "Events", processor_instance=p)
