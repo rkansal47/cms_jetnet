@@ -149,7 +149,8 @@ def main(args):
     out = run(fileset, "Events", processor_instance=p)
     print(out)
 
-    dd.to_parquet(df=out, path=f"/eos/uscms/store/user/rkansal/cms_jetnet/{args.tag}")
+    os.system(f"mkdir -p {args.tag}")
+    dd.to_parquet(df=out, path=f"{args.tag}/")
 
     elapsed = time.time() - tic
     # print(f"Metrics: {metrics}")
