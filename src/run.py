@@ -119,42 +119,86 @@ def main(args):
 
     print(fileset)
 
-    import time
-    from distributed import Client
-    from lpcjobqueue import LPCCondorCluster
-    import dask.dataframe as dd
+    if args.executor == "dask":
+        import time
+        from distributed import Client
+        from lpcjobqueue import LPCCondorCluster
+        import dask.dataframe as dd
 
-    tic = time.time()
-    cluster = LPCCondorCluster(
-        ship_env=True,
-        transfer_input_files="src/cms_jetnet",
-    )
-    client = Client(cluster)
-    nanoevents_plugin = NanoeventsSchemaPlugin()
-    client.register_worker_plugin(nanoevents_plugin)
-    cluster.adapt(minimum=1, maximum=30)
+        tic = time.time()
+        cluster = LPCCondorCluster(
+            ship_env=True,
+            transfer_input_files="src/cms_jetnet",
+        )
+        client = Client(cluster)
+        nanoevents_plugin = NanoeventsSchemaPlugin()
+        client.register_worker_plugin(nanoevents_plugin)
+        cluster.adapt(minimum=1, maximum=30)
 
-    print("Waiting for at least one worker")
-    client.wait_for_workers(1)
+        print("Waiting for at least one worker")
+        client.wait_for_workers(1)
 
-    # does treereduction help?
-    executor = processor.DaskExecutor(client=client, use_dataframes=True)
-    run = processor.Runner(
-        executor=executor,
-        # savemetrics=True,
-        schema=nanoevents.NanoAODSchema,
-        chunksize=args.chunksize,
-        maxchunks=args.maxchunks,
-    )
+        # does treereduction help?
+        executor = processor.DaskExecutor(client=client, use_dataframes=True)
+        run = processor.Runner(
+            executor=executor,
+            # savemetrics=True,
+            schema=nanoevents.NanoAODSchema,
+            chunksize=args.chunksize,
+            maxchunks=args.maxchunks,
+        )
 
-    out = run(fileset, "Events", processor_instance=p)
+        out = run(fileset, "Events", processor_instance=p)
 
-    os.system(f"mkdir -p {args.tag}")
-    dd.to_parquet(df=out, path=f"{args.tag}/")
+        os.system(f"mkdir -p {args.tag}")
+        dd.to_parquet(df=out, path=f"{args.tag}/")
 
-    elapsed = time.time() - tic
-    # print(f"Metrics: {metrics}")
-    print(f"Finished in {elapsed:.1f}s")
+        elapsed = time.time() - tic
+        # print(f"Metrics: {metrics}")
+        print(f"Finished in {elapsed:.1f}s")
+    else:
+        local_dir = os.path.abspath(".")
+        local_parquet_dir = os.path.abspath(os.path.join(".", "outparquet"))
+
+        if os.path.isdir(local_parquet_dir):
+            os.system(f"rm -rf {local_parquet_dir}")
+
+        os.system(f"mkdir {local_parquet_dir}")
+
+        uproot.open.defaults["xrootd_handler"] = uproot.source.xrootd.MultithreadedXRootDSource
+
+        if args.executor == "futures":
+            executor = processor.FuturesExecutor(status=True)
+        else:
+            executor = processor.IterativeExecutor(status=True)
+
+        run = processor.Runner(
+            executor=executor,
+            savemetrics=True,
+            schema=nanoevents.NanoAODSchema,
+            chunksize=args.chunksize,
+            maxchunks=None if args.maxchunks == 0 else args.maxchunks,
+        )
+
+        out, metrics = run(fileset, "Events", processor_instance=p)
+
+        import pandas as pd
+        import pyarrow.parquet as pq
+        import pyarrow as pa
+
+        print("reading parquet")
+
+        pddf = pd.read_parquet(local_parquet_dir)
+        print(pddf)
+
+        print("read parquet")
+
+        # need to write with pyarrow as pd.to_parquet doesn't support different types in
+        # multi-index column names
+        table = pa.Table.from_pandas(pddf)
+        pq.write_table(table, f"{local_dir}/{args.starti}-{args.endi}.parquet")
+
+        print("dumped parquet")
 
 
 if __name__ == "__main__":
