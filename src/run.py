@@ -93,7 +93,7 @@ def main(args):
     # define processor
     from cms_jetnet.processors import DatasetProcessor
 
-    p = DatasetProcessor(radius=args.radius)
+    p = DatasetProcessor(radius=args.label.split("_")[0])
 
     fileset = (
         get_fileset(
@@ -151,13 +151,6 @@ if __name__ == "__main__":
     parser.add_argument("--year", default="2017", help="year", type=str)
     parser.add_argument("--starti", default=0, help="start index of files", type=int)
     parser.add_argument("--endi", default=-1, help="end index of files", type=int)
-    parser.add_argument(
-        "--processor",
-        default="trigger",
-        help="Trigger processor",
-        type=str,
-        choices=["trigger", "skimmer", "input"],
-    )
     parser.add_argument(
         "--executor",
         type=str,
