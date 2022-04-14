@@ -24,8 +24,7 @@ def get_fileset(year, samples, subsamples):
         set_subsamples = list(sample_set.keys())
 
         # check if any subsamples for this sample have been specified
-        get_subsamples = set(set_su
-bsamples).intersection(subsamples)
+        get_subsamples = set(set_subsamples).intersection(subsamples)
 
         # if so keep only that subset
         if len(get_subsamples):
