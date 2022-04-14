@@ -30,6 +30,19 @@ with warnings.catch_warnings():
     fxn()
 
 
+def add_bool_arg(parser, name, help, default=False, no_name=None):
+    varname = "_".join(name.split("-"))  # change hyphens to underscores
+    group = parser.add_mutually_exclusive_group(required=False)
+    group.add_argument("--" + name, dest=varname, action="store_true", help=help)
+    if no_name is None:
+        no_name = "no-" + name
+        no_help = "don't " + help
+    else:
+        no_help = help
+    group.add_argument("--" + no_name, dest=varname, action="store_false", help=no_help)
+    parser.set_defaults(**{varname: default})
+
+
 # for running on condor
 nanoevents.NanoAODSchema.nested_index_items["FatJetAK15_pFCandsIdxG"] = (
     "FatJetAK15_nConstituents",
@@ -167,13 +180,8 @@ if __name__ == "__main__":
     parser.add_argument("--label", default="AK8_QCD", help="label", type=str)
     parser.add_argument("--njets", default=2, help="njets", type=int)
     parser.add_argument("--maxchunks", default=0, help="max chunks", type=int)
-    parser.add_argument(
-        "--test",
-        default=False,
-        help="use smaller fileset for testing",
-        action=argparse.BooleanOptionalAction,
-        type=bool,
-    )
+    add_bool_arg(parser, "test", "use smaller fileset for testing")
+
     args = parser.parse_args()
 
     main(args)
