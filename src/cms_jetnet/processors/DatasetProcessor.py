@@ -242,12 +242,15 @@ class DatasetProcessor(ProcessorABC):
             print("No jets passed selection")
             return {}
 
-        # fname = events.behavior["__events_factory__"]._partition_key.replace("/", "_")
+        fname = events.behavior["__events_factory__"]._partition_key.replace("/", "_")
 
         # convert output to pandas
         df = self.to_pandas(jet_vars)
 
-        return df
+        # save to parquet
+        self.dump_table(df, fname + ".parquet")
+
+        return {}
 
     def postprocess(self, accumulator):
         return accumulator
