@@ -143,7 +143,7 @@ def main(args):
         schema=nanoevents.NanoAODSchema,
         chunksize=args.chunksize,
     )
-    out, metrics = run({key: fileset[key] for key in args.samples}, "Events", processor_instance=p)
+    out, metrics = run(fileset, "Events", processor_instance=p)
 
     dd.to_parquet(df=out, path=f"/eos/uscms/store/user/rkansal/cms_jetnet/{args.tag}")
 
