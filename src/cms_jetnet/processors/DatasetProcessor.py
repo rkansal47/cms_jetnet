@@ -67,7 +67,7 @@ class DatasetProcessor(ProcessorABC):
                 **P4,
                 "msoftdrop": "msd",
             },
-            "GenJet": {**P4},
+            "GenJet": {**P4, "partonFlavour": "partonFlavour"},
             "RecoPart": {
                 **P4,
                 "pdgId": "pid",
@@ -134,7 +134,7 @@ class DatasetProcessor(ProcessorABC):
             matched_gen_jet_mask = fatjets.delta_r(matched_gen_jet) < match_dR
 
             GenJetVars = {
-                f"GenJet_{key}": matched_gen_jet.mass * ak.values_astype(matched_gen_jet_mask, int)
+                f"GenJet_{key}": matched_gen_jet[var] * ak.values_astype(matched_gen_jet_mask, int)
                 + ak.values_astype(~matched_gen_jet_mask, int) * (-99999)
                 for (var, key) in self.skim_vars["GenJet"].items()
             }
