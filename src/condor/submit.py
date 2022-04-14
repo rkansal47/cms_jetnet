@@ -13,7 +13,7 @@ from string import Template
 import json
 
 
-def get_fileset(processor, year, samples, subsamples):
+def get_fileset(year, samples, subsamples):
     with open(f"data/pfnanoindex_{year}.json", "r") as f:
         full_fileset = json.load(f)
 
@@ -24,7 +24,8 @@ def get_fileset(processor, year, samples, subsamples):
         set_subsamples = list(sample_set.keys())
 
         # check if any subsamples for this sample have been specified
-        get_subsamples = set(set_subsamples).intersection(subsamples)
+        get_subsamples = set(set_su
+bsamples).intersection(subsamples)
 
         # if so keep only that subset
         if len(get_subsamples):
@@ -70,7 +71,7 @@ def main(args):
     print("CONDOR work dir: " + outdir)
     os.system(f"mkdir -p /eos/uscms/{outdir}")
 
-    fileset = get_fileset(args.processor, args.year, args.samples, args.subsamples)
+    fileset = get_fileset(args.year, args.samples, args.subsamples)
 
     jdl_templ = "src/condor/submit.templ.jdl"
     sh_templ = "src/condor/submit.templ.sh"
@@ -104,7 +105,6 @@ def main(args):
                     "endi": (j + 1) * args.files_per_job,
                     "sample": sample,
                     "subsample": subsample,
-                    "processor": args.processor,
                     "maxchunks": args.maxchunks,
                     "label": args.label,
                     "njets": args.njets,
@@ -139,13 +139,6 @@ if __name__ == "__main__":
     parser.add_argument("--tag", default="Test", help="process tag", type=str)
     parser.add_argument(
         "--outdir", dest="outdir", default="outfiles", help="directory for output files", type=str
-    )
-    parser.add_argument(
-        "--processor",
-        default="trigger",
-        help="which processor",
-        type=str,
-        choices=["trigger", "skimmer", "input"],
     )
     parser.add_argument(
         "--samples",
