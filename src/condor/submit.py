@@ -153,7 +153,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--files-per-job", default=20, help="# files per condor job", type=int)
     parser.add_argument("--maxchunks", default=0, help="max chunks", type=int)
-    parser.add_argument("--label", default="AK15_H_VV", help="label", type=str)
+    parser.add_argument("--label", default="AK8_H_VV", help="label", type=str)
     parser.add_argument("--njets", default=2, help="njets", type=int)
     parser.add_argument(
         "--submit", dest="submit", action="store_true", help="submit jobs when created"
